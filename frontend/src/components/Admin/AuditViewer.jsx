@@ -94,7 +94,7 @@ const AuditViewer = ({ onBack }) => {
             <h1 className="feed-title-blue" style={{ fontSize: '1.6rem' }}>
               Audit et Traçabilité Système
             </h1>
-            <p style={{ color: '#160c0cff', opacity: '0.9', marginTop: '6px', fontSize: '0.95rem', fontWeight: '500' }}>
+            <p style={{ color: 'var(--dash-text-muted)', marginTop: '6px', fontSize: '0.95rem', fontWeight: '500' }}>
               Historique complet des actions cliniques effectuées sur la plateforme.
             </p>
           </div>
@@ -143,46 +143,46 @@ const AuditViewer = ({ onBack }) => {
               <React.Fragment key={log.id}>
                 <tr className="template-row" onClick={() => setExpandedLog(expandedLog === log.id ? null : log.id)} style={{ cursor: 'pointer' }}>
                   <td>
-                    <span className="type-badge" style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', fontWeight: '800', border: '1px solid rgba(59,130,246,0.2)' }}>
+                    <span className="type-badge" style={{ background: 'var(--dash-primary-light)', color: 'var(--dash-primary)', padding: '4px 10px', borderRadius: '100px', fontSize: '0.75rem', fontWeight: '800' }}>
                       {formatAction(log.action)}
                     </span>
                   </td>
                   <td>
-                    <span style={{ color: '#f8fafc', fontSize: '0.9rem', fontWeight: '600' }}>{formatEntity(log.entity_type)}</span>
+                    <span style={{ color: 'var(--dash-text-main)', fontSize: '0.9rem', fontWeight: '600' }}>{formatEntity(log.entity_type)}</span>
                   </td>
-                  <td style={{ fontWeight: '700', color: '#fff' }}>{log.actor || 'Système'}</td>
-                  <td style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: '#fff', fontWeight: '600' }}>
+                  <td style={{ fontWeight: '700', color: 'var(--dash-text-main)' }}>{log.actor || 'Système'}</td>
+                  <td style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'var(--dash-text-muted)', fontWeight: '600' }}>
                     {new Date(log.created_at).toLocaleDateString('fr-FR')} • {new Date(log.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
                   </td>
                   <td>
-                    <button className="btn btn-ghost btn-sm" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+                    <button className="btn-action">
                       {expandedLog === log.id ? 'Fermer' : 'Voir Détails'}
                     </button>
                   </td>
                 </tr>
                 {expandedLog === log.id && (
                   <tr>
-                    <td colSpan="5" style={{ padding: '16px', background: 'rgba(59, 130, 246, 0.03)' }}>
+                    <td colSpan="5" style={{ padding: '16px', background: 'var(--dash-bg)' }}>
                       <div style={{
-                        background: 'rgba(15, 23, 42, 0.8)',
+                        background: 'var(--dash-surface)',
                         padding: '20px',
                         borderRadius: '12px',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        boxShadow: 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.05)'
+                        border: '1px solid var(--dash-border)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.03)'
                       }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '16px' }}>
                           {Object.entries(log.details).map(([key, value]) => (
-                            <div key={key} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px' }}>
-                              <div style={{ fontSize: '0.65rem', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', marginBottom: '4px' }}>
+                            <div key={key} style={{ borderBottom: '1px solid var(--dash-border)', paddingBottom: '8px' }}>
+                              <div style={{ fontSize: '0.65rem', color: 'var(--dash-text-muted)', textTransform: 'uppercase', fontWeight: '800', marginBottom: '4px' }}>
                                 {key.replace(/_/g, ' ')}
                               </div>
-                              <div style={{ fontSize: '0.9rem', color: '#e2e8f0' }}>
+                              <div style={{ fontSize: '0.9rem', color: 'var(--dash-text-main)' }}>
                                 {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                               </div>
                             </div>
                           ))}
                           {Object.keys(log.details).length === 0 && (
-                            <span style={{ color: '#64748b', fontStyle: 'italic' }}>Aucune donnée supplémentaire.</span>
+                            <span style={{ color: 'var(--dash-text-muted)', fontStyle: 'italic' }}>Aucune donnée supplémentaire.</span>
                           )}
                         </div>
                       </div>

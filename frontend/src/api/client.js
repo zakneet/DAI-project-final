@@ -58,6 +58,9 @@ client.interceptors.response.use(
 // ── API Endpoints ──
 
 export const api = {
+  // Direct client access for custom requests
+  client: client,
+
   // Auth
   login: (username, password) => client.post('/token/', { username, password }),
   register: (userData) => client.post('/register/', userData),
@@ -70,6 +73,9 @@ export const api = {
   getPatients: () => client.get('/patients/'),
   getPatient: (id) => client.get(`/patients/${id}/`),
   createPatient: (data) => client.post('/patients/', data),
+  updatePatient: (id, data) => client.patch(`/patients/${id}/`, data),
+  getMyPatientProfile: () => client.get('/patients/my-profile/'),
+  updateMyPatientProfile: (data) => client.patch('/patients/my-profile/', data),
 
   // Cases (Anesthesia Case / Dossier)
   getCases: () => client.get('/cases/'),
@@ -108,7 +114,8 @@ export const api = {
   // DICOM Imager
   getDicomImage: () => client.get('/dicom-view/'),
 
-  // PerOp
+  // PerOp - Additional methods for dashboard
+  getPerOpSessions: () => client.get('/perop/sessions/'),
   getPerOpSummary: (caseId) => client.get(`/cases/${caseId}/perop/summary/`),
   startPerOpSession: (caseId, data) => client.post(`/cases/${caseId}/perop/sessions/start/`, data),
   endPerOpSession: (caseId, data) => client.post(`/cases/${caseId}/perop/sessions/end/`, data),
@@ -117,19 +124,34 @@ export const api = {
   getPerOpEvents: (caseId) => client.get(`/cases/${caseId}/perop/events/`),
   postPerOpEvent: (caseId, data) => client.post(`/cases/${caseId}/perop/events/`, data),
 
-  // PostOp
+  // PostOp - Additional methods for dashboard
+  getPostOpQueue: () => client.get('/postop/recovery-queue/'),
   getPostOpSummary: (caseId) => client.get(`/cases/${caseId}/postop/summary/`),
   startPostOpStay: (caseId, data) => client.post(`/cases/${caseId}/postop/stay/start/`, data),
   endPostOpStay: (caseId, data) => client.post(`/cases/${caseId}/postop/stay/end/`, data),
   getPostOpObservations: (caseId) => client.get(`/cases/${caseId}/postop/observations/`),
   postPostOpObservation: (caseId, data) => client.post(`/cases/${caseId}/postop/observations/`, data),
   getAldreteScore: (caseId) => client.get(`/cases/${caseId}/postop/scores/aldrete/`),
+  updateAldreteScore: (patientId, data) => client.patch(`/postop/aldrete-scores/${patientId}/`, data),
 
   // Alerts
+  getAlerts: () => client.get('/alerts/'),
   getCaseAlerts: (caseId) => client.get(`/cases/${caseId}/alerts/`),
   createCaseAlert: (caseId, data) => client.post(`/cases/${caseId}/alerts/`, data),
   acknowledgeAlert: (alertId, data) => client.post(`/alerts/${alertId}/ack/`, data),
   resolveAlert: (alertId, data) => client.post(`/alerts/${alertId}/resolve/`, data),
+  updateAlert: (alertId, data) => client.patch(`/alerts/${alertId}/`, data),
+
+  // DME/DPI
+  getDMERecords: () => client.get('/dme/medical-records/'),
+  getDMEPatient: (patientId) => client.get(`/dme/medical-records/patient/${patientId}/`),
+  getMyDMERecord: () => client.get('/dme/medical-records/my-record/'),
+  updateMyDMERecord: (data) => client.patch('/dme/medical-records/my-record/', data),
+  postDMEHistory: (data) => client.post('/dme/history/', data),
+  postDMEAllergy: (data) => client.post('/dme/allergies/', data),
+  postDMEDiagnosis: (data) => client.post('/dme/diagnoses/', data),
+  postDMEPrescription: (data) => client.post('/dme/prescriptions/', data),
+  postDMEDocument: (data) => client.post('/dme/documents/', data),
 
   // Question Templates (Admin)
   getTemplates: () => client.get('/question-templates/'),
@@ -139,6 +161,9 @@ export const api = {
 
   // User Profile
   updateMe: (data) => client.patch('/me/', data),
+
+  // AI Copilot
+  askAICopilot: (data) => client.post('/ai/ask/', data),
 };
 
 export { client };

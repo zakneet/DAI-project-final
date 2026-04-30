@@ -23,7 +23,9 @@
   position: relative;
   overflow-y: auto;
   background: var(--bg-primary);
-  padding: 20px 0 28px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Transitions for sub-elements */
@@ -41,6 +43,6 @@
 
 @media (max-width: 1024px) {
   .page-container {
-     padding-bottom: 80px; /* Space for potentially mobile fixed elements */
+     /* padding-bottom removed for full height dashboards */
   }
 }

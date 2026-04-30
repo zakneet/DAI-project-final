@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../api/client';
+import PatientOnboarding from './PatientOnboarding';
 import './PatientDashboard.css';
 
 const PatientDashboard = () => {
@@ -10,6 +11,7 @@ const PatientDashboard = () => {
   const [caseStatus, setCaseStatus] = useState(null);    // statut du dossier
   const [activeCaseDecision, setActiveCaseDecision] = useState(null); // décision médecin
   const [questionnaireStatus, setQuestionnaireStatus] = useState(null); // statut du questionnaire
+  const [patientProfile, setPatientProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,9 +22,21 @@ const PatientDashboard = () => {
   const fetchPatientStatus = async () => {
     try {
       const patientId = user?.patient_id;
-      if (!patientId) return;
 
-      // Récupérer le dossier du patient
+      // 1. Check Onboarding Status
+      try {
+        const profileRes = await api.getMyPatientProfile();
+        setPatientProfile(profileRes.data);
+      } catch (err) {
+        console.log("No profile found or error fetching profile", err);
+      }
+
+      if (!patientId) {
+        setLoading(false);
+        return;
+      }
+
+      // 2. Fetch Cases
       const casesRes = await api.getCasesByPatient(patientId);
       const cases = casesRes.data;
       if (cases && cases.length > 0) {
@@ -45,6 +59,11 @@ const PatientDashboard = () => {
   };
 
   const questionnaireDone = questionnaireStatus === 'SUBMITTED' || questionnaireStatus === 'VALIDATED';
+
+  // Si le patient n'a pas complété l'onboarding, on l'affiche en premier
+  if (patientProfile && patientProfile.onboarding_completed === false) {
+    return <PatientOnboarding onComplete={fetchPatientStatus} />;
+  }
 
   return (
     <div className="pd-wrapper animate-fade-in">

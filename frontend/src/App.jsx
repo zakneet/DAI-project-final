@@ -12,7 +12,17 @@ const AirwayEvaluation = lazy(() => import('./components/PreOp/AirwayEvaluation'
 
 // Lazy load — Doctor
 const DoctorDashboard = lazy(() => import('./components/Dashboard/DoctorDashboard'));
+const DoctorDashboardEnhanced = lazy(() => import('./components/Dashboard/DoctorDashboardEnhanced'));
 const PreOpModule = lazy(() => import('./components/PreOp/PreOpModule'));
+
+// Lazy load — IADE (Anesthesia)
+const IADEDashboard = lazy(() => import('./components/Dashboard/IADEDashboard'));
+
+// Lazy load — SSPI (Post-Op Recovery)
+const SSPIDashboard = lazy(() => import('./components/Dashboard/SSPIDashboard'));
+
+// Lazy load — Patient DPI
+const PatientDPI = lazy(() => import('./pages/PatientDPI'));
 
 import './App.css';
 
@@ -44,17 +54,36 @@ const PatientRoute = ({ children }) => {
   return children;
 };
 
+const IADERoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <Loader />;
+  if (!user) return <Navigate to="/login" />;
+  if (user.role !== 'IADE') return <Navigate to="/" />;
+  return children;
+};
+
+const SSPIRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  if (loading) return <Loader />;
+  if (!user) return <Navigate to="/login" />;
+  if (user.role !== 'SSPI') return <Navigate to="/" />;
+  return children;
+};
+
 const DashboardRedirect = () => {
   const { user } = useAuth();
   if (!user) return <Navigate to="/login" />;
   if (user.role === 'DOCTOR') return <Navigate to="/doctor-dashboard" />;
   if (user.role === 'PATIENT') return <Navigate to="/patient-dashboard" />;
+  if (user.role === 'IADE') return <Navigate to="/iade-dashboard" />;
+  if (user.role === 'SSPI') return <Navigate to="/sspi-dashboard" />;
   return <Navigate to="/login" />;
 };
 
 function AppContent() {
   const location = useLocation();
   const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  const isLandingPage = location.pathname === '/';
 
   if (isAuthPage) {
     return (
@@ -65,10 +94,21 @@ function AppContent() {
     );
   }
 
+  // Landing page — full screen, no dashboard chrome
+  if (isLandingPage) {
+    return (
+      <Suspense fallback={<Loader />}>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+        </Routes>
+      </Suspense>
+    );
+  }
+
   return (
-    <div className="app-container" style={{ backgroundColor: '#000', minHeight: '100vh' }}>
-      <main className="main-content" style={{ padding: 0, margin: 0, width: '100%' }}>
-        <div className="page-container" style={{ maxWidth: '100%' }}>
+    <div className="app-container">
+      <main className="main-content">
+        <div className="page-container">
           <Suspense fallback={<Loader />}>
             <Routes>
               {/* Root route — Landing Page is always the first page seen */}
@@ -82,6 +122,12 @@ function AppContent() {
               {/* Doctor routes */}
               <Route path="/doctor-dashboard" element={<DoctorRoute><DoctorDashboard /></DoctorRoute>} />
               <Route path="/doctor-dashboard/preop" element={<DoctorRoute><PreOpModule /></DoctorRoute>} />
+
+              {/* IADE (Anesthesia) routes */}
+              <Route path="/iade-dashboard" element={<IADERoute><IADEDashboard /></IADERoute>} />
+
+              {/* SSPI (Post-Op Recovery) routes */}
+              <Route path="/sspi-dashboard" element={<SSPIRoute><SSPIDashboard /></SSPIRoute>} />
 
               {/* Fallback */}
               <Route path="*" element={<Navigate to="/" replace />} />

@@ -11,10 +11,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from .env file
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -40,14 +46,24 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'corsheaders',
+    
+    # Core apps
     'common',
     'patient',
     'casefile',
     'audit',
+    
+    # Clinical modules
     'preop',
-    "perop",
-    "postop",
-    "alert",
+    'perop',
+    'postop',
+    'alert',
+    
+    # NEW: Extended modules
+    'dme',  # Medical records / DPI
+    'report',  # Report generation
+    'settings_app',  # Clinical settings
+    'ai_assistant', # RAG Chatbot
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

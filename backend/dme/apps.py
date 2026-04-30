@@ -1,0 +1,7 @@
+from django.apps import AppConfig
+
+
+class DmeConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'dme'
+    verbose_name = 'DME/DPI - Medical Records'
