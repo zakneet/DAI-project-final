@@ -166,80 +166,82 @@ const ClinicalCopilot = ({ contextType = 'doctor', patientId, caseId, onClose })
   };
 
   return (
-    <div className="ai-page-layout">
+    <div className={`ai-page-layout ${contextType === 'iade' ? 'compact-mode' : ''}`}>
       {/* ── Sidebar ── */}
-      <aside className="ai-sidebar">
-        {/* Back button */}
-        <button className="ai-back-btn" onClick={onClose}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
-          </svg>
-          {CONTEXT_LABELS[contextType] || 'Dashboard'}
-        </button>
-
-        {/* Brand */}
-        <div className="ai-sidebar-brand">
-          <div className="ai-brand-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7v1a4 4 0 0 1-4 4h-1c-.55 0-1 .45-1 1v1a2 2 0 1 1-4 0v-1c0-.55-.45-1-1-1H9a4 4 0 0 1-4-4v-1a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 12 2z"/>
-              <path d="M9 14h.01"/><path d="M15 14h.01"/>
+      {contextType !== 'iade' && (
+        <aside className="ai-sidebar">
+          {/* Back button */}
+          <button className="ai-back-btn" onClick={onClose}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>
             </svg>
-          </div>
-          <div>
-            <div className="ai-brand-name">AI Assistant</div>
-            <div className="ai-brand-tag">DAI · Clinique</div>
-          </div>
-        </div>
+            {CONTEXT_LABELS[contextType] || 'Dashboard'}
+          </button>
 
-        {/* New conversation */}
-        <button className="ai-new-chat-btn" onClick={handleNewConversation}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-          </svg>
-          Nouvelle conversation
-        </button>
-
-        {/* Suggestions */}
-        <div className="ai-sidebar-section-label">Suggestions rapides</div>
-        <div className="ai-suggestions-list">
-          {SUGGESTIONS.map((s, i) => (
-            <button key={i} className="ai-suggestion-btn" onClick={() => sendMessage(s)}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+          {/* Brand */}
+          <div className="ai-sidebar-brand">
+            <div className="ai-brand-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7v1a4 4 0 0 1-4 4h-1c-.55 0-1 .45-1 1v1a2 2 0 1 1-4 0v-1c0-.55-.45-1-1-1H9a4 4 0 0 1-4-4v-1a7 7 0 0 1 7-7h1V5.73A2 2 0 0 1 12 2z"/>
+                <path d="M9 14h.01"/><path d="M15 14h.01"/>
               </svg>
-              {s}
-            </button>
-          ))}
-        </div>
-
-        {/* Active Context & Generation Plans */}
-        {(patientId || caseId) && (
-          <div className="ai-context-card">
-            <div className="ai-context-label">Contexte actif</div>
-            {patientId && <div className="ai-context-val">👤 Patient ID: {String(patientId).substring(0, 8)}</div>}
-            {caseId && <div className="ai-context-val">📋 Dossier: {String(caseId).substring(0, 8)}</div>}
-            
-            <div className="ai-sidebar-section-label" style={{marginTop: '15px'}}>Actions Intelligentes</div>
-            <button 
-              className="ai-suggestion-btn" 
-              style={{ background: 'rgba(16, 185, 129, 0.1)', borderColor: '#10b981', color: '#065f46', marginTop: '8px', fontWeight: 'bold' }}
-              onClick={() => sendMessage("Génère un plan de traitement et d'action détaillé pour ce patient en tenant compte de tous ses scores cliniques. Le patient peut-il être opéré dans cet état ?")}
-            >
-              ⚡ Générer Plan de Traitement
-            </button>
+            </div>
+            <div>
+              <div className="ai-brand-name">AI Assistant</div>
+              <div className="ai-brand-tag">DAI · Clinique</div>
+            </div>
           </div>
-        )}
 
-        <div className="ai-model-info">
-          <div className="ai-model-dot"></div>
-          OpenRouter · Auto Free
-        </div>
-      </aside>
+          {/* New conversation */}
+          <button className="ai-new-chat-btn" onClick={handleNewConversation}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Nouvelle conversation
+          </button>
+
+          {/* Suggestions */}
+          <div className="ai-sidebar-section-label">Suggestions rapides</div>
+          <div className="ai-suggestions-list">
+            {SUGGESTIONS.map((s, i) => (
+              <button key={i} className="ai-suggestion-btn" onClick={() => sendMessage(s)}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+                </svg>
+                {s}
+              </button>
+            ))}
+          </div>
+
+          {/* Active Context & Generation Plans */}
+          {(patientId || caseId) && (
+            <div className="ai-context-card">
+              <div className="ai-context-label">Contexte actif</div>
+              {patientId && <div className="ai-context-val">👤 Patient ID: {String(patientId).substring(0, 8)}</div>}
+              {caseId && <div className="ai-context-val">📋 Dossier: {String(caseId).substring(0, 8)}</div>}
+              
+              <div className="ai-sidebar-section-label" style={{marginTop: '15px'}}>Actions Intelligentes</div>
+              <button 
+                className="ai-suggestion-btn" 
+                style={{ background: 'rgba(16, 185, 129, 0.1)', borderColor: '#10b981', color: '#065f46', marginTop: '8px', fontWeight: 'bold' }}
+                onClick={() => sendMessage("Génère un plan de traitement et d'action détaillé pour ce patient en tenant compte de tous ses scores cliniques. Le patient peut-il être opéré dans cet état ?")}
+              >
+                ⚡ Générer Plan de Traitement
+              </button>
+            </div>
+          )}
+
+          <div className="ai-model-info">
+            <div className="ai-model-dot"></div>
+            OpenRouter · Auto Free
+          </div>
+        </aside>
+      )}
 
       {/* ── Main Chat ── */}
       <main className="ai-main">
         {/* Header */}
-        <div className="ai-main-header">
+        <div className={`ai-main-header ${contextType === 'iade' ? 'compact' : ''}`}>
           <div className="ai-main-header-left">
             <div className="ai-header-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -249,7 +251,9 @@ const ClinicalCopilot = ({ contextType = 'doctor', patientId, caseId, onClose })
             </div>
             <div>
               <h2 className="ai-main-title">AI Assistant DAI</h2>
-              <p className="ai-main-sub">Assistant clinique en anesthésie · Plateforme DAI</p>
+              <p className="ai-main-sub">
+                {contextType === 'iade' ? 'Assistant clinique' : 'Assistant clinique en anesthésie · Plateforme DAI'}
+              </p>
             </div>
           </div>
           <div className="ai-status-online">

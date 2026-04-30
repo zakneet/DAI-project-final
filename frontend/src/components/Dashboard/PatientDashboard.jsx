@@ -65,14 +65,40 @@ const PatientDashboard = () => {
     return <PatientOnboarding onComplete={fetchPatientStatus} />;
   }
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const greeting = hour < 18 ? 'Bonjour' : 'Bonsoir';
+    let statusText = '';
+    
+    if (loading) return '';
+    if (!caseStatus) {
+      statusText = 'votre dossier est en attente de création.';
+    } else if (questionnaireDone) {
+      statusText = 'vous êtes prêt(e) pour votre consultation.';
+    } else {
+      statusText = "n'oubliez pas de compléter votre questionnaire médical.";
+    }
+    return `${greeting} ${user?.first_name || 'Patient'}, ${statusText}`;
+  };
+
+  const getProgress = () => {
+    let prog = 0;
+    if (caseStatus) prog += 50;
+    if (questionnaireDone) prog += 50;
+    return prog;
+  };
+
+  const progress = getProgress();
+
   return (
     <div className="pd-wrapper animate-fade-in">
-      <div className="pd-container">
+      <div className="pd-container" style={{ animation: 'staggerFadeUp 0.6s ease forwards' }}>
 
         {/* Patient Identity */}
-        <div className="pd-panel pd-identity-card">
+        <div className="pd-panel pd-identity-card" style={{ animationDelay: '0.1s' }}>
           <div className="pd-identity-info">
             <h2>{user?.first_name || 'Patient'} {user?.last_name || ''}</h2>
+            <p style={{ color: 'var(--primary)', fontWeight: '600', marginBottom: '12px' }}>{getGreeting()}</p>
             {caseStatus && (
               <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '6px' }}>
                 <span style={{
@@ -113,8 +139,9 @@ const PatientDashboard = () => {
           </button>
         </div>
 
-        {/* Main Actions */}
-        <div className="pd-action-grid" style={{ gridTemplateColumns: '1fr' }}>
+        {/* Main Actions & Progress */}
+        <div className="pd-grid-main" style={{ animationDelay: '0.2s' }}>
+          
           <div className="pd-action-card">
             <div className="pd-action-icon">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -135,10 +162,24 @@ const PatientDashboard = () => {
               </button>
             )}
           </div>
+
+          <div className="pd-panel pd-progress-card">
+            <h3>Avancement</h3>
+            <div className="pd-progress-circle-wrap">
+              <svg width="120" height="120" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" strokeWidth="8" />
+                <circle cx="50" cy="50" r="45" fill="none" stroke="var(--primary)" strokeWidth="8" strokeDasharray="283" strokeDashoffset={283 - (283 * progress) / 100} style={{ transition: 'stroke-dashoffset 1.5s ease-in-out' }} strokeLinecap="round" />
+              </svg>
+              <div className="pd-progress-text">
+                <span>{progress}%</span>
+                <small>Prêt</small>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Status Tracker */}
-        <div className="pd-panel status-tracker">
+        <div className="pd-panel status-tracker" style={{ animationDelay: '0.3s' }}>
           <div className="pd-tracker-title">
             <span className="dot">•</span> Suivi de votre dossier
           </div>
@@ -156,6 +197,40 @@ const PatientDashboard = () => {
               </div>
             </div>
           )}
+        </div>
+
+        {/* Info Grid: Documents & Support */}
+        <div className="pd-grid-2" style={{ animationDelay: '0.4s' }}>
+          <div className="pd-panel pd-docs-card">
+            <h3 className="pd-panel-title">Mes Documents</h3>
+            <div className="pd-doc-list">
+              <div className="pd-doc-item">
+                <div className="pd-doc-icon">📝</div>
+                <div className="pd-doc-info">
+                  <strong>Consignes pré-opératoires</strong>
+                  <small>À lire avant l'intervention</small>
+                </div>
+                <button className="pd-btn-icon">⬇️</button>
+              </div>
+              <div className="pd-doc-item">
+                <div className="pd-doc-icon">🏥</div>
+                <div className="pd-doc-info">
+                  <strong>Livret d'accueil</strong>
+                  <small>Guide de la clinique</small>
+                </div>
+                <button className="pd-btn-icon">⬇️</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="pd-panel pd-support-card">
+            <h3 className="pd-panel-title">Besoin d'aide ?</h3>
+            <p>Notre équipe médicale est à votre disposition pour toute question concernant votre intervention.</p>
+            <div className="pd-support-actions">
+              <button className="pd-btn-secondary">📞 Contacter la clinique</button>
+              <button className="pd-btn-outline" style={{ marginTop: '10px' }}>❓ Foire aux questions</button>
+            </div>
+          </div>
         </div>
 
       </div>

@@ -113,11 +113,17 @@
   border-color: #fca5a5;
 }
 
-/* Action Cards Grid */
-.pd-action-grid {
+/* Action Cards Grid & Progress */
+.pd-grid-main {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 20px;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .pd-grid-main {
+    grid-template-columns: 1fr;
+  }
 }
 
 .pd-action-card {
@@ -127,8 +133,8 @@
   padding: 40px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
+  text-align: left;
   box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
@@ -193,6 +199,183 @@
 .pd-btn-primary:hover {
   transform: translateY(-2px) scale(1.02);
   box-shadow: 0 8px 25px rgba(91, 141, 239, 0.4);
+}
+
+.pd-progress-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 24px;
+}
+
+.pd-progress-card h3 {
+  font-size: 1.1rem;
+  margin: 0 0 24px 0;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.pd-progress-circle-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.pd-progress-text {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.pd-progress-text span {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.pd-progress-text small {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Secondary Grids (Docs & Support) */
+.pd-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .pd-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pd-panel-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-main);
+  margin: 0 0 20px 0;
+}
+
+.pd-doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pd-doc-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  transition: all 0.2s;
+}
+
+.pd-doc-item:hover {
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary-light);
+}
+
+.pd-doc-icon {
+  font-size: 1.5rem;
+}
+
+.pd-doc-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.pd-doc-info strong {
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.pd-doc-info small {
+  font-size: 0.8rem;
+  color: var(--text-gray);
+  margin-top: 2px;
+}
+
+.pd-btn-icon {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pd-btn-icon:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+.pd-support-card p {
+  color: var(--text-gray);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.pd-support-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pd-btn-outline {
+  background: transparent;
+  color: var(--text-main);
+  border: 2px solid #e2e8f0;
+  border-radius: 100px;
+  padding: 14px 24px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.pd-btn-outline:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+/* Animations */
+@keyframes staggerFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.pd-container > * {
+  opacity: 0;
+  animation: staggerFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Status Tracker */

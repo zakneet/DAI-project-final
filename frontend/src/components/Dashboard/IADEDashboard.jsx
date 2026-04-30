@@ -21,6 +21,7 @@ const IADEDashboard = () => {
   const [loadingCases, setLoadingCases] = useState(false);
   const [error, setError] = useState(null);
   const [showEventLog, setShowEventLog] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
   const [newEvent, setNewEvent] = useState({
     event_type: 'PROCEDURE',
     title: '',
@@ -172,6 +173,43 @@ const IADEDashboard = () => {
     }
   };
 
+  // ─── Log a Quick Action Event ─────────────────────────────────────────
+  const handleQuickAction = async (actionType) => {
+    if (!peropSummary?.session?.id) {
+      alert('Veuillez démarrer la session per-opératoire d\'abord.');
+      return;
+    }
+    setSubmittingEvent(true);
+    try {
+      let payload = {
+        event_type: 'PROCEDURE',
+        title: actionType,
+        description: 'Action rapide enregistrée',
+        timestamp: new Date().toISOString(),
+        session: peropSummary.session.id,
+        anesthesia_case: selectedCase.id
+      };
+
+      if (actionType.includes('Propofol')) {
+        payload.event_type = 'MEDICATION';
+        payload.medication_administration = {
+          drug_name: 'Propofol',
+          dose: 'Bolus Standard',
+          route: 'IV',
+          administered_at: new Date().toISOString()
+        };
+      }
+
+      await api.postPerOpEvent(selectedCase.id, payload);
+      await fetchPeropSummary(selectedCase.id);
+    } catch (err) {
+      console.error('Error logging quick action:', err);
+      alert('Erreur lors de l\'enregistrement rapide.');
+    } finally {
+      setSubmittingEvent(false);
+    }
+  };
+
   // ─── Helpers ─────────────────────────────────────────────────────────────────
   const getVitalsByType = (vitals, type) => {
     const v = vitals?.find(vt => vt.vital_type === type);
@@ -193,21 +231,23 @@ const IADEDashboard = () => {
     return `${h}h${String(m).padStart(2, '0')}`;
   };
 
+  const getSparklineSVG = (colorClass) => {
+    // Generate a simple decorative sparkline based on status color
+    const strokeColor = colorClass === 'critical' ? '#ef4444' : colorClass === 'warning' ? '#f59e0b' : '#10b981';
+    return (
+      <svg className="sparkline" viewBox="0 0 100 30" preserveAspectRatio="none">
+        <path d="M0,20 Q10,10 20,25 T40,15 T60,20 T80,5 T100,15" fill="none" stroke={strokeColor} strokeWidth="2" strokeOpacity="0.3" strokeLinecap="round" />
+      </svg>
+    );
+  };
+
   const handleLogout = async () => {
     await logout();
     navigate('/login');
   };
 
-  const eventTypeColors = {
-    MEDICATION: '#60a5fa',
-    PROCEDURE: '#10b981',
-    INCIDENT: '#ef4444',
-    TECHNICAL: '#8b5cf6'
-  };
-
   const sessionStatus = peropSummary?.session?.status;
   const latestVitals = peropSummary?.latest_vitals || [];
-  const latestEvents = peropSummary?.latest_events || [];
 
   const hrVal = getVitalsByType(latestVitals, 'HEART_RATE');
   const spo2Val = getVitalsByType(latestVitals, 'SPO2');
@@ -217,7 +257,7 @@ const IADEDashboard = () => {
   const etco2Val = getVitalsByType(latestVitals, 'ETCO2');
 
   return (
-    <div className="iade-dashboard">
+    <div className={`iade-dashboard ${darkMode ? 'dark-mode' : ''}`}>
       {/* Header */}
       <div className="iade-header">
         <div className="header-left">
@@ -225,6 +265,9 @@ const IADEDashboard = () => {
           <p>Anesthésie &amp; Soins Per-Opératoires</p>
         </div>
         <div className="header-right">
+          <button className="theme-toggle-btn" onClick={() => setDarkMode(!darkMode)} title="Basculer le thème">
+            {darkMode ? '☀️ Clair' : '🌙 Sombre'}
+          </button>
           <div className="user-profile">
             <span className="user-role">IADE</span>
             <span className="user-name">{user?.first_name || user?.username || 'Infirmier Anesthésiste'}</span>
@@ -301,12 +344,36 @@ const IADEDashboard = () => {
         <div className="details-panel">
           {selectedCase ? (
             <>
+              {/* Patient Context Banner */}
+              <div className="patient-context-banner">
+                <div className="pcb-header">
+                  <h3>{selectedCase.patient_full_name}</h3>
+                  <span className="pcb-badge">ASA {selectedCase.asa_score || '2'}</span>
+                </div>
+                <div className="pcb-details">
+                  <div className="pcb-item">
+                    <span className="pcb-label">Intervention</span>
+                    <span className="pcb-val">{selectedCase.surgery_type}</span>
+                  </div>
+                  <div className="pcb-item">
+                    <span className="pcb-label">Allergies</span>
+                    <span className="pcb-val warning">{selectedCase.allergies || 'Aucune connue'}</span>
+                  </div>
+                  <div className="pcb-item">
+                    <span className="pcb-label">Poids / Taille</span>
+                    <span className="pcb-val">78 kg / 175 cm</span>
+                  </div>
+                  <div className="pcb-item">
+                    <span className="pcb-label">Groupe Sanguin</span>
+                    <span className="pcb-val">O+</span>
+                  </div>
+                </div>
+              </div>
+
               {/* Session Control Bar */}
               <div className="vitals-section">
                 <div className="section-header">
-                  <h3>
-                    {selectedCase.patient_full_name} — {selectedCase.surgery_type}
-                  </h3>
+                  <h3>Monitoring & Constantes</h3>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     {!peropSummary?.session ? (
                       <button className="log-btn" onClick={handleStartSession}>
@@ -334,6 +401,7 @@ const IADEDashboard = () => {
                           {hrVal} bpm
                         </span>
                         <span className="vital-trend">Normal: 60–100</span>
+                        {getSparklineSVG(getVitalAlertStatus(hrVal, 60, 50, 100, 110))}
                       </div>
                     )}
                     {spo2Val !== null && (
@@ -343,15 +411,17 @@ const IADEDashboard = () => {
                           {spo2Val} %
                         </span>
                         <span className="vital-trend">Cible: ≥ 95%</span>
+                        {getSparklineSVG(spo2Val < 90 ? 'critical' : spo2Val < 95 ? 'warning' : 'normal')}
                       </div>
                     )}
                     {sysVal !== null && diaVal !== null && (
                       <div className="vital-card">
                         <span className="vital-label">Pression Artérielle</span>
                         <span className="vital-value normal">
-                          {sysVal}/{diaVal} mmHg
+                          {sysVal}/{diaVal}
                         </span>
                         <span className="vital-trend">Normal: 110–140/70–90</span>
+                        {getSparklineSVG('normal')}
                       </div>
                     )}
                     {tempVal !== null && (
@@ -361,6 +431,7 @@ const IADEDashboard = () => {
                           {tempVal} °C
                         </span>
                         <span className="vital-trend">Normal: 36.5–37.5</span>
+                        {getSparklineSVG(tempVal < 36 || tempVal > 38 ? 'warning' : 'normal')}
                       </div>
                     )}
                     {etco2Val !== null && (
@@ -370,6 +441,7 @@ const IADEDashboard = () => {
                           {etco2Val} mmHg
                         </span>
                         <span className="vital-trend">Normal: 35–45</span>
+                        {getSparklineSVG(etco2Val < 35 || etco2Val > 45 ? 'warning' : 'normal')}
                       </div>
                     )}
                   </div>
@@ -382,18 +454,42 @@ const IADEDashboard = () => {
                 )}
               </div>
 
-              {/* Event Logging */}
+              {/* Quick Actions & Event Logging */}
               {peropSummary?.session?.status === 'ACTIVE' && (
                 <div className="event-section">
                   <div className="section-header">
-                    <h3>Enregistrement d'Événements</h3>
+                    <h3>Actions & Événements</h3>
                     <button
                       className="toggle-log-btn"
                       onClick={() => setShowEventLog(!showEventLog)}
                     >
-                      {showEventLog ? '▼ Masquer' : '▶ Afficher'}
+                      {showEventLog ? '▼ Formulaire manuel' : '▶ Formulaire manuel'}
                     </button>
                   </div>
+
+                  {/* Quick Action Buttons */}
+                  {!showEventLog && (
+                    <div className="quick-actions-grid">
+                      <button className="qa-btn" onClick={() => handleQuickAction('Induction Anesthésique')}>
+                        <span className="qa-icon">😴</span> Induction
+                      </button>
+                      <button className="qa-btn" onClick={() => handleQuickAction('Intubation')}>
+                        <span className="qa-icon">🌬️</span> Intubation
+                      </button>
+                      <button className="qa-btn" onClick={() => handleQuickAction('Incision')}>
+                        <span className="qa-icon">🔪</span> Incision
+                      </button>
+                      <button className="qa-btn" onClick={() => handleQuickAction('Bolus Propofol')}>
+                        <span className="qa-icon">💉</span> Propofol
+                      </button>
+                      <button className="qa-btn" onClick={() => handleQuickAction('Extubation')}>
+                        <span className="qa-icon">🗣️</span> Extubation
+                      </button>
+                      <button className="qa-btn qa-warning" onClick={() => handleQuickAction('Incident Mineur')}>
+                        <span className="qa-icon">⚠️</span> Incident
+                      </button>
+                    </div>
+                  )}
 
                   {showEventLog && (
                     <div className="event-form">
@@ -540,9 +636,12 @@ const IADEDashboard = () => {
             </div>
           )}
         </div>
+        
+        {/* ── Right Panel: AI Assistant ── */}
+        <div className="copilot-panel">
+          <ClinicalCopilot contextType="iade" patientId={selectedCase ? selectedCase.patient : null} caseId={selectedCase ? selectedCase.id : null} />
+        </div>
       </div>
-      {/* Intégration de l'Assistant IA Gemini */}
-      <ClinicalCopilot contextType="iade" patientId={selectedCase ? selectedCase.patient : null} caseId={selectedCase ? selectedCase.id : null} />
     </div>
   );
 };
